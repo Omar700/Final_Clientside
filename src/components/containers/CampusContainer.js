@@ -5,10 +5,13 @@ The Container component is responsible for stateful logic and data fetching, and
 passes data (if any) as props to the corresponding View component.
 If needed, it also defines the component's "connect" function.
 ================================================== */
-import Header from './Header';
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { fetchCampusThunk } from "../../store/thunks";
+import {
+  fetchCampusThunk,
+  deleteCampusThunk,
+  editStudentThunk
+} from "../../store/thunks";
 
 import { CampusView } from "../views";
 
@@ -23,8 +26,11 @@ class CampusContainer extends Component {
   render() {
     return (
       <div>
-        <Header />
-        <CampusView campus={this.props.campus} />
+        <CampusView
+          campus={this.props.campus}
+          unassignStudent={this.props.unassignStudent}
+          deleteCampus={this.props.deleteCampus}
+        />
       </div>
     );
   }
@@ -38,11 +44,17 @@ const mapState = (state) => {
     campus: state.campus,  // Get the State object from Reducer "campus"
   };
 };
+
 // 2. The "mapDispatch" argument is used to dispatch Action (Redux Thunk) to Redux Store.
 // The "mapDispatch" calls the specific Thunk to dispatch its action. The "dispatch" is a function of Redux Store.
 const mapDispatch = (dispatch) => {
   return {
     fetchCampus: (id) => dispatch(fetchCampusThunk(id)),
+    deleteCampus: (id) => dispatch(deleteCampusThunk(id)),
+    unassignStudent: (student) => {
+      return dispatch(editStudentThunk({ ...student, campusId: null }))
+        .then(() => dispatch(fetchCampusThunk(student.campusId)));
+    },
   };
 };
 

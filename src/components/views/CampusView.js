@@ -8,24 +8,54 @@ import { Link } from "react-router-dom";
 
 // Take in props data to construct the component
 const CampusView = (props) => {
-  const {campus} = props;
-  
+  const { campus, unassignStudent, deleteCampus } = props; // renamed prop
+
+  if (!campus) {
+    return <div>Loading campus information...</div>;
+  }
+
+  const hasStudents = Array.isArray(campus.students) && campus.students.length > 0;
+
   // Render a single Campus view with list of its students
   return (
     <div>
       <h1>{campus.name}</h1>
+      <img
+        src={campus.imageUrl || "https://placehold.co/300x200"}
+        alt={`${campus.name} campus`}
+        width="300"
+      />
       <p>{campus.address}</p>
       <p>{campus.description}</p>
-      {campus.students.map( student => {
-        let name = student.firstname + " " + student.lastname;
-        return (
-          <div key={student.id}>
-            <Link to={`/student/${student.id}`}>
-              <h2>{name}</h2>
-            </Link>             
-          </div>
-        );
-      })}
+
+      <h3>Enrolled Students:</h3>
+      {!hasStudents ? (
+        <p>No students are currently enrolled at this campus.</p>
+      ) : (
+        campus.students.map((student) => {
+          let name = student.firstName + " " + student.lastName;
+          return (
+            <div key={student.id}>
+              <Link to={`/student/${student.id}`}>
+                <h2>{name}</h2>
+              </Link>
+              <button onClick={() => unassignStudent(student)}>Remove Student</button> {/* now unassigns */}
+            </div>
+          );
+        })
+      )}
+
+      <br />
+      <Link to={`/editcampus/${campus.id}`}>
+        <button>Edit Campus</button>
+      </Link>
+      &nbsp;
+      <button onClick={() => deleteCampus(campus.id)}>Delete Campus</button>
+
+      <br /><br />
+      <Link to={`/campus/${campus.id}/addstudent`}>
+      <button>Add Student</button>
+    </Link>
     </div>
   );
 };
