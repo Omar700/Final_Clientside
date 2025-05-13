@@ -99,4 +99,36 @@ export const fetchStudentThunk = id => async dispatch => {  // The THUNK
   } catch(err) {
     console.error(err);
   }
+  
+};
+
+export const deleteCampusThunk = campusId => async dispatch => {
+  try {
+    await axios.delete(`/api/campuses/${campusId}`);
+    dispatch(ac.deleteCampus(campusId));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const addCampusThunk = (campus) => async (dispatch) => {
+  try {
+    const res = await axios.post(`/api/campuses`, campus);
+    dispatch(ac.addCampus(res.data));
+    return res.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+// Edit Campus Thunk
+export const editCampusThunk = (campus) => async (dispatch) => {
+  try {
+    const res = await axios.put(`/api/campuses/${campus.id}`, campus);
+    dispatch(ac.editCampus(res.data));
+    return res.data;
+  } catch (err) {
+    console.error('Edit campus failed:', err);
+    throw err;
+  }
 };
