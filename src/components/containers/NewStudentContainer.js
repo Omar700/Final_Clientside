@@ -1,96 +1,125 @@
-/*==================================================
-NewStudentContainer.js
-
-The Container component is responsible for stateful logic and data fetching, and
-passes data (if any) as props to the corresponding View component.
-If needed, it also defines the component's "connect" function.
-================================================== */
-import Header from './Header';
 import { Component } from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 
 import NewStudentView from '../views/NewStudentView';
-import { addStudentThunk } from '../../store/thunks';
+import { addStudentThunk, fetchAllCampusesThunk } from '../../store/thunks';
 
 class NewStudentContainer extends Component {
-  // Initialize state
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
-      firstname: "", 
-      lastname: "", 
-      campusId: null, 
-      redirect: false, 
+      firstName: '',
+      lastName: '',
+      email: '',
+      imageUrl: '',
+      gpa: '',
+      campusId: '',
+      errors: {},
+      redirect: false,
       redirectId: null
     };
   }
 
-  // Capture input data when it is entered
-  handleChange = event => {
-    this.setState({
-      [event.target.name]: event.target.value
-    });
+  componentDidMount() {
+    this.props.fetchAllCampuses();
   }
 
-  // Take action after user click the submit button
-  handleSubmit = async event => {
-    event.preventDefault();  // Prevent browser reload/refresh after submit.
+  validateField = (name, value) => {
+    const errors = { ...this.state.errors };
 
-    let student = {
-        firstname: this.state.firstname,
-        lastname: this.state.lastname,
-        campusId: this.state.campusId
-    };
-    
-    // Add new student in back-end database
-    let newStudent = await this.props.addStudent(student);
-
-    // Update state, and trigger redirect to show the new student
-    this.setState({
-      firstname: "", 
-      lastname: "", 
-      campusId: null, 
-      redirect: true, 
-      redirectId: newStudent.id
-    });
-  }
-
-  // Unmount when the component is being removed from the DOM:
-  componentWillUnmount() {
-      this.setState({redirect: false, redirectId: null});
-  }
-
-  // Render new student input form
-  render() {
-    // Redirect to new student's page after submit
-    if(this.state.redirect) {
-      return (<Redirect to={`/student/${this.state.redirectId}`}/>)
+    if ((name === 'firstName' || name === 'lastName') && !value.trim()) {
+      errors[name] = `${name === 'firstName' ? 'First' : 'Last'} name is required.`;
+    } else if (name === 'email') {
+      const isValid = /^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/.test(value);
+      errors.email = isValid ? '' : 'Invalid email format.';
+    } else if (name === 'gpa') {
+      const num = parseFloat(value);
+      errors.gpa = value === '' || (num >= 0 && num <= 4) ? '' : 'GPA must be between 0.0 and 4.0';
+    } else if (name === 'campusId') {
+      if (value.trim() === '') {
+        errors.campusId = '';
+      } else {
+        const exists = this.props.allCampuses.some(c => c.id === Number(value));
+        errors.campusId = exists ? '' : 'Campus ID does not exist.';
+      }
+    } else {
+      errors[name] = '';
     }
 
-    // Display the input form via the corresponding View component
+    this.setState({ errors });
+  };
+
+  handleChange = (event) => {
+    const { name, value } = event.target;
+    this.validateField(name, value);
+    this.setState({ [name]: value });
+  };
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const { firstName, lastName, email, imageUrl, gpa, campusId } = this.state;
+
+    ['firstName', 'lastName', 'email', 'gpa', 'campusId'].forEach((field) =>
+      this.validateField(field, this.state[field])
+    );
+
+    if (Object.values(this.state.errors).some((e) => e)) return;
+
+    const student = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      imageUrl: imageUrl || undefined,
+      gpa: gpa ? parseFloat(gpa) : null,
+      campusId: campusId.trim() === '' ? null : Number(campusId)
+    };
+
+    try {
+      const newStudent = await this.props.addStudent(student);
+      this.setState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        imageUrl: '',
+        gpa: '',
+        campusId: '',
+        redirect: true,
+        redirectId: newStudent.id
+      });
+    } catch (err) {
+      alert('Failed to add student.');
+    }
+  };
+
+  componentWillUnmount() {
+    this.setState({ redirect: false, redirectId: null });
+  }
+
+  render() {
+    if (this.state.redirect) {
+      return <Redirect to={`/student/${this.state.redirectId}`} />;
+    }
+
     return (
-      <div>
-        <Header />
-        <NewStudentView 
-          handleChange = {this.handleChange} 
-          handleSubmit={this.handleSubmit}      
-        />
-      </div>          
+      <NewStudentView
+        handleChange={this.handleChange}
+        handleSubmit={this.handleSubmit}
+        student={this.state}
+        errors={this.state.errors}
+      />
     );
   }
 }
 
-// The following input argument is passed to the "connect" function used by "NewStudentContainer" component to connect to Redux Store.
-// The "mapDispatch" argument is used to dispatch Action (Redux Thunk) to Redux Store.
-// The "mapDispatch" calls the specific Thunk to dispatch its action. The "dispatch" is a function of Redux Store.
-const mapDispatch = (dispatch) => {
-    return({
-        addStudent: (student) => dispatch(addStudentThunk(student)),
-    })
-}
+const mapState = (state) => ({
+  allCampuses: state.allCampuses
+});
 
-// Export store-connected container by default
-// NewStudentContainer uses "connect" function to connect to Redux Store and to read values from the Store 
-// (and re-read the values when the Store State updates).
-export default connect(null, mapDispatch)(NewStudentContainer);
+const mapDispatch = (dispatch) => ({
+  addStudent: (student) => dispatch(addStudentThunk(student)),
+  fetchAllCampuses: () => dispatch(fetchAllCampusesThunk())
+});
+
+export default connect(mapState, mapDispatch)(NewStudentContainer);
