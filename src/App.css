@@ -1,10 +1,48 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f8f4;
+  color: #2c2c2c;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
 .App {
-  background-color: beige;
+  background-color: #fdfcf7;
   min-height: 100vh;
+  padding: 40px 20px;
   text-align: center;
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4 {
+  color: #2f2f2f;
+  margin-top: 0;
 }
 
 .App-link {
-  color: #61dafb;
+  color: #007acc;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.App-link:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4f6d7a;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #3b5561;
 }
 
