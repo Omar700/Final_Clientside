@@ -12,6 +12,7 @@ import {
   deleteCampusThunk,
   editStudentThunk
 } from "../../store/thunks";
+import { clearCampus } from '../../store/actions/actionCreators';
 
 import { CampusView } from "../views";
 
@@ -20,6 +21,11 @@ class CampusContainer extends Component {
   componentDidMount() {
     // Get campus ID from URL (API link)
     this.props.fetchCampus(this.props.match.params.id);
+  }
+
+  // Clear the campus data when component is removed from DOM
+  componentWillUnmount() {
+    this.props.clearCampus(); 
   }
 
   // Render a Campus view by passing campus data as props to the corresponding View component
@@ -55,6 +61,7 @@ const mapDispatch = (dispatch) => {
       return dispatch(editStudentThunk({ ...student, campusId: null }))
         .then(() => dispatch(fetchCampusThunk(student.campusId)));
     },
+    clearCampus: () => dispatch(clearCampus())  
   };
 };
 

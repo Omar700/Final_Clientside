@@ -1,10 +1,3 @@
-/*==================================================
-EditStudentContainer.js
-
-The Container component is responsible for stateful logic and data fetching, and
-passes data (if any) as props to the corresponding View component.
-If needed, it also defines the component's "connect" function.
-==================================================*/
 import { Component } from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
@@ -28,32 +21,34 @@ class EditStudentContainer extends Component {
       campusId: '',
       errors: {},
       redirect: false,
-      redirectId: null
+      redirectId: null,
+      hasLoadedStudent: false
     };
   }
 
   componentDidMount() {
     const studentId = this.props.match.params.id;
-    this.props.fetchStudent(studentId).then((student) => {
-      if (!student) return;
-      const {
-        firstName,
-        lastName,
-        email,
-        imageUrl,
-        gpa,
-        campusId
-      } = student;
+    this.props.fetchStudent(studentId);
+    this.props.fetchAllCampuses();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.student.id &&
+      !this.state.hasLoadedStudent &&
+      this.props.student !== prevProps.student
+    ) {
+      const { firstName, lastName, email, imageUrl, gpa, campusId } = this.props.student;
       this.setState({
         firstName,
         lastName,
         email,
-        imageUrl,
+        imageUrl: imageUrl || '',
         gpa: gpa?.toString() || '',
-        campusId: campusId?.toString() || ''
+        campusId: campusId?.toString() || '',
+        hasLoadedStudent: true
       });
-    });
-    this.props.fetchAllCampuses();
+    }
   }
 
   validateField = (name, value) => {
@@ -119,6 +114,10 @@ class EditStudentContainer extends Component {
       return <Redirect to={`/student/${this.state.redirectId}`} />;
     }
 
+    if (!this.props.student.id) {
+      return <div>Loading student data...</div>;
+    }
+
     return (
       <EditStudentView
         {...this.state}
@@ -130,6 +129,7 @@ class EditStudentContainer extends Component {
 }
 
 const mapState = (state) => ({
+  student: state.student,
   allCampuses: state.allCampuses
 });
 
