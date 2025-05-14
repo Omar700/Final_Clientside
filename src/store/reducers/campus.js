@@ -5,22 +5,22 @@ This is a Reducer function that accepts 2 parameters: the previous state object 
 Depending on the Action object, the Reducer updates the State and return the new State object.
 It also defines the State and its default initial value.
 ================================================== */
-import { FETCH_CAMPUS, EDIT_CAMPUS } from "../actions/actionTypes";  // Import Action Types
+import { FETCH_CAMPUS, EDIT_CAMPUS, CLEAR_CAMPUS } from "../actions/actionTypes";
 
-// Define default Initial State
-const initialState = {
-  students: [],  // Empty students array
-};
+// Define default Initial State as null (no campus loaded yet)
+const initialState = null;
 
 // REDUCER:
 const campus = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_CAMPUS:
-      return action.payload;
+      return action.payload;  // full campus object
     case EDIT_CAMPUS:
-      return action.payload;  // Updated campus from PUT request
+      return action.payload;
+    case CLEAR_CAMPUS:
+      return initialState;
     default:
-      return state;  // Return unchanged state by default
+      return state;
   }
 };
 

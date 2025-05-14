@@ -8,12 +8,14 @@ If needed, it also defines the component's "connect" function.
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { fetchStudentThunk } from "../../store/thunks";
+import { clearStudent } from "../../store/actions/actionCreators";
 import { StudentView } from "../views";
 
 class StudentContainer extends Component {
   // Get student data from back-end database
   componentDidMount() {
     //getting student ID from url
+    this.props.clearStudent();
     this.props.fetchStudent(this.props.match.params.id);
   }
 
@@ -39,6 +41,7 @@ const mapState = (state) => {
 const mapDispatch = (dispatch) => {
   return {
     fetchStudent: (id) => dispatch(fetchStudentThunk(id)),
+    clearStudent: () => dispatch(clearStudent()),
   };
 };
 

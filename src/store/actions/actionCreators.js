@@ -1,4 +1,6 @@
 import * as at from './actionTypes';
+import { CLEAR_STUDENT } from './actionTypes'
+import {  CLEAR_CAMPUS } from './actionTypes';
 
 // ACTION CREATORS;
 /** needs to be an action creator
@@ -78,3 +80,13 @@ export const deleteCampus = (campusId) => ({
   type: at.DELETE_CAMPUS,
   payload: campusId,
 });
+
+export const clearStudent = () => ({
+  type: CLEAR_STUDENT,
+});
+
+export const clearCampus = () => {
+  return {
+    type: CLEAR_CAMPUS,
+  };
+};
