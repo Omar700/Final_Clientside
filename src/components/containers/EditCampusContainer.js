@@ -34,16 +34,20 @@ class EditCampusContainer extends Component {
   componentDidMount() {
     const campusId = this.props.match.params.id;
     this.props.fetchCampus(campusId).then(() => {
-      const { name, address, description, imageUrl } = this.props.campus;
-      this.setState({ name, address, description, imageUrl });
+      const { campus } = this.props;
+      if (campus && campus.id) {
+        const { name, address, description, imageUrl } = campus;
+        this.setState({ name, address, description, imageUrl });
+      }
     });
     this.props.fetchAllCampuses();
   }
 
   // Update form if campus data changes
   componentDidUpdate(prevProps) {
-    if (prevProps.campus.id !== this.props.campus.id) {
-      const { name, address, description, imageUrl } = this.props.campus;
+    const { campus } = this.props;
+    if (campus && campus.id && prevProps.campus?.id !== campus.id) {
+      const { name, address, description, imageUrl } = campus;
       this.setState({ name, address, description, imageUrl });
     }
   }
@@ -52,27 +56,13 @@ class EditCampusContainer extends Component {
     let errors = { ...this.state.errors };
 
     if (name === "name") {
-      if (!value.trim()) {
-        errors.name = "Campus name is required.";
-      } else {
-        errors.name = "";
-      }
+      errors.name = value.trim() ? "" : "Campus name is required.";
     }
-
     if (name === "address") {
-      if (!value.trim()) {
-        errors.address = "Address is required.";
-      } else {
-        errors.address = "";
-      }
+      errors.address = value.trim() ? "" : "Address is required.";
     }
-
     if (name === "description") {
-      if (!value.trim()) {
-        errors.description = "Description is required.";
-      } else {
-        errors.description = "";
-      }
+      errors.description = value.trim() ? "" : "Description is required.";
     }
 
     this.setState({ errors });
@@ -121,6 +111,10 @@ class EditCampusContainer extends Component {
   render() {
     if (this.state.redirect) {
       return <Redirect to={`/campus/${this.state.redirectId}`} />;
+    }
+
+    if (!this.props.campus || !this.props.campus.id) {
+      return <div>Loading campus...</div>;
     }
 
     return (

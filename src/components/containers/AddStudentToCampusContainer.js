@@ -81,6 +81,10 @@ class AddStudentToCampusContainer extends Component {
       return <Redirect to={`/student/${this.state.redirectId}`} />;
     }
 
+    if (!this.props.campus) {
+      return <div>Loading campus information...</div>;
+    }
+
     return (
       <AddStudentToCampusView
         campus={this.props.campus}
