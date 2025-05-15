@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 // Take in props data to construct the component
 const CampusView = (props) => {
-  const { campus, unassignStudent, deleteCampus } = props; // renamed prop
+  const { campus, unassignStudent  } = props; // renamed prop
 
   if (!campus) {
     return <div>Loading campus information...</div>;
@@ -50,7 +50,6 @@ const CampusView = (props) => {
         <button>Edit Campus</button>
       </Link>
       &nbsp;
-      <button onClick={() => deleteCampus(campus.id)}>Delete Campus</button>
 
       <br /><br />
       <Link to={`/campus/${campus.id}/addstudent`}>
